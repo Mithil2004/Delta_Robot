@@ -1,0 +1,36 @@
+#define STEP_PIN 2   // X-STEP pin on CNC Shield
+#define DIR_PIN 5    // X-DIR pin on CNC Shield
+#define ENABLE_PIN 8 // X-ENABLE pin on CNC Shield
+
+const int stepsPerRevolution = 200; // Adjust based on your motor
+
+void setup() {
+    pinMode(STEP_PIN, OUTPUT);
+    pinMode(DIR_PIN, OUTPUT);
+    pinMode(ENABLE_PIN, OUTPUT);
+
+    digitalWrite(ENABLE_PIN, LOW); // Enable motor driver
+}
+
+void loop() {
+    // Move Forward
+    digitalWrite(DIR_PIN, HIGH); // Set direction FORWARD
+    rotateMotor(1); // Rotate 1 revolution
+    delay(1000); // Wait 1 second
+
+    // Move Reverse
+    digitalWrite(DIR_PIN, LOW); // Set direction REVERSE
+    rotateMotor(1); // Rotate 1 revolution
+    delay(1000); // Wait 1 second
+}
+
+void rotateMotor(int rotations) {
+    int totalSteps = rotations * stepsPerRevolution;
+
+    for (int i = 0; i < totalSteps; i++) {
+        digitalWrite(STEP_PIN, HIGH);
+        delayMicroseconds(500); // Adjust speed
+        digitalWrite(STEP_PIN, LOW);
+        delayMicroseconds(500);
+    }
+}
