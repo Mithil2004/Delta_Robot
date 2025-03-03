@@ -2,7 +2,7 @@
 #define DIR_PIN 5    // X-DIR pin on CNC Shield
 #define ENABLE_PIN 8 // X-ENABLE pin on CNC Shield
 
-const int stepsPerRevolution = 200; // Adjust based on your motor
+const int stepsPerRevolution = 200; // Adjust based on stepper motor
 
 void setup() {
     pinMode(STEP_PIN, OUTPUT);
@@ -10,18 +10,27 @@ void setup() {
     pinMode(ENABLE_PIN, OUTPUT);
 
     digitalWrite(ENABLE_PIN, LOW); // Enable motor driver
+    Serial.begin(9600);
+    Serial.println("Enter number of rotations (negative for reverse):");
 }
 
 void loop() {
-    // Move Forward
-    digitalWrite(DIR_PIN, HIGH); // Set direction FORWARD
-    rotateMotor(1); // Rotate 1 revolution
-    delay(1000); // Wait 1 second
+    if (Serial.available()) {
+        int rotations = Serial.parseInt();
+        if (rotations != 0) { // Ignore zero input
+            Serial.print("Rotating ");
+            Serial.print(abs(rotations));
+            Serial.println(rotations > 0 ? " times FORWARD..." : " times REVERSE...");
 
-    // Move Reverse
-    digitalWrite(DIR_PIN, LOW); // Set direction REVERSE
-    rotateMotor(1); // Rotate 1 revolution
-    delay(1000); // Wait 1 second
+            digitalWrite(DIR_PIN, rotations > 0 ? HIGH : LOW); // Set direction
+            delay(50); // Allow driver to process direction change
+
+            rotateMotor(abs(rotations)); // Pass absolute value
+
+            Serial.println("Rotation Complete!");
+            Serial.println("Enter new number of rotations:");
+        }
+    }
 }
 
 void rotateMotor(int rotations) {
@@ -29,8 +38,9 @@ void rotateMotor(int rotations) {
 
     for (int i = 0; i < totalSteps; i++) {
         digitalWrite(STEP_PIN, HIGH);
-        delayMicroseconds(500); // Adjust speed
+        delayMicroseconds(500);
         digitalWrite(STEP_PIN, LOW);
         delayMicroseconds(500);
     }
 }
+
